@@ -1,4 +1,3 @@
-# WhoAreThere
+# Notifier
 
-A util tool to know the people that are in your house
-  
+A simple service to deliver push notifications
