@@ -1,32 +1,37 @@
-class Notification:
-
-    def __init__(self, id, title, timestamp, source, type, status, body):
-        self.id = id
-        self.title = title
-        self.timestamp = timestamp
-        self.source = source
-        self.type = type
-        self.status = status
-        self.body = body
+from utils.time import TimeUtil
 
 
 class NotificationService:
 
     def __init__(self):
-        pass
+        self.time_util = TimeUtil()
 
-    def add_notification(self, title, timestamp, source, type, status, body):
-        # Logic to send notification
-        pass
+    def _generate_new_id(self, notification_list):
+        id_list = [
+            notification.get("id") for notification in notification_list
+        ]
+        id_list.sort()
+        last_id = id_list[-1]
+        return last_id + 1
 
-    if __name__ == "__main__":
-        notification_list = []
+    def add(self, notification_list, title, source, type, status, body):
+        new_id = self._generate_new_id(notification_list)
 
-        custom_notification = Notification(
-            id=1,
-            title="Server Down",
-            timestamp="2024-10-01T12:00:00Z",
-            source="MonitoringService",
-            type="Alert",
-            status="Unread",
-            body="The main server is down. Immediate attention required.")
+        notification_list.append({
+            "id": new_id,
+            "title": title,
+            "timestamp": self.time_util.get_current_timestamp(),
+            "source": source,
+            "type": type,
+            "status": status,
+            "body": body
+        })
+
+    def remove_by_id(self, notification_list, id):
+        notification_to_delete = next((notification
+                                       for notification in notification_list
+                                       if notification.get("id") == id), None)
+        if notification_to_delete:
+            notification_list.remove(notification_to_delete)
+            return True
+        return False
