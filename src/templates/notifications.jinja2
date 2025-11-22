@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifier</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/styles/notification.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="bg-dark shadow-sm py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="text-white h4 mb-0">Notifier</h1>
+            <div class="d-flex align-items-center">
+                <div class="position-relative me-3">
+                    <i class="bi bi-bell-fill text-white-50" style="font-size: 1.5rem;"></i>
+                    <span
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+                </div>
+                <button class="btn btn-outline-secondary">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Control Bar -->
+    <main class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="#" class="text-secondary" onclick="refreshNotifications(event)">
+                <i class="bi bi-arrow-clockwise" style="font-size: 1.5rem;"></i>
+            </a>
+            <button class="btn btn-outline-danger" onclick="clearAllNotifications()">Clear All</button>
+        </div>
+
+        <!-- Notifications Container -->
+        <div id="notificationsContainer" class="row gx-4">
+            <!-- Notifications will be injected here -->
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/scripts/notification.js"></script>
+</body>
+
+</html>
