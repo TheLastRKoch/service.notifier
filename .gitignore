@@ -1,6 +1,7 @@
 # IDE
 .vscode/
 notebook.md
+src/dummy.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
