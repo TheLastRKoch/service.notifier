@@ -50,7 +50,7 @@ const notificationsData = [
 let notifications = [...notificationsData];
 
 // Initialize notifications on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     renderNotifications();
     updateNotificationBadge();
 });
@@ -58,63 +58,69 @@ document.addEventListener('DOMContentLoaded', function() {
 // Render all notifications
 function renderNotifications() {
     const container = document.getElementById('notificationsContainer');
-    
+
     if (notifications.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <i class="bi bi-bell-slash"></i>
-                <p>No notifications</p>
+            <div class="col-12 text-center text-muted mt-5">
+                <i class="bi bi-bell-slash" style="font-size: 4rem;"></i>
+                <p class="mt-3">No notifications</p>
             </div>
         `;
         return;
     }
-    
+
     container.innerHTML = notifications.map(notification => `
-        <div class="notification-card" data-id="${notification.id}">
-            <div class="notification-header" onclick="toggleNotification(${notification.id})">
-                <i class="notification-icon bi ${notification.muted ? 'bi-bell-slash' : 'bi-bell'}"></i>
-                <span class="notification-title">Source: ${notification.title}</span>
-                <div class="notification-controls">
-                    <button class="expand-btn" id="expand-${notification.id}">
-                        <i class="bi bi-chevron-down"></i>
-                    </button>
-                    <button class="delete-btn" onclick="deleteNotification(event, ${notification.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
+        <div class="col-md-6 col-lg-4 mb-2" data-id="${notification.id}">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi ${notification.muted ? 'bi-bell-slash' : 'bi-bell'} me-2"></i>
+                        <span class="fw-bold">${notification.title}</span>
+                    </div>
+                    <div class="d-flex">
+                        <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="collapse" data-bs-target="#content-${notification.id}">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification(event, ${notification.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="notification-content" id="content-${notification.id}">
-                <div class="notification-row">
-                    <span class="notification-label">Source: ${notification.source}</span>
-                    <span class="notification-label">Type: ${notification.type}</span>
+                <div class="collapse" id="content-${notification.id}">
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold">Source:</span>
+                                <span>${notification.source}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold">Type:</span>
+                                <span>${notification.type}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold">Status:</span>
+                                <span>${notification.status}</span>
+                            </div>
+                        </div>
+                        <p class="card-text mt-3">${notification.message}</p>
+                    </div>
+                    <div class="card-footer text-body-secondary">
+                        2 days ago
+                    </div>
                 </div>
-                <div class="notification-row">
-                    <span class="notification-label">Status: ${notification.status}</span>
-                </div>
-                <p class="notification-text">${notification.message}</p>
             </div>
         </div>
     `).join('');
 }
 
-// Toggle notification expand/collapse
-function toggleNotification(id) {
-    const content = document.getElementById(`content-${id}`);
-    const expandBtn = document.getElementById(`expand-${id}`);
-    
-    content.classList.toggle('show');
-    expandBtn.classList.toggle('expanded');
-}
-
 // Delete a single notification
 function deleteNotification(event, id) {
     event.stopPropagation();
-    
-    // Add fade out animation
-    const card = event.target.closest('.notification-card');
+
+    const card = event.target.closest('.col-md-6');
     card.style.transition = 'opacity 0.3s ease';
     card.style.opacity = '0';
-    
+
     setTimeout(() => {
         notifications = notifications.filter(notification => notification.id !== id);
         renderNotifications();
@@ -125,7 +131,7 @@ function deleteNotification(event, id) {
 // Clear all notifications
 function clearAllNotifications() {
     if (notifications.length === 0) return;
-    
+
     if (confirm('Are you sure you want to clear all notifications?')) {
         notifications = [];
         renderNotifications();
@@ -134,10 +140,11 @@ function clearAllNotifications() {
 }
 
 // Refresh notifications
-function refreshNotifications() {
-    const refreshBtn = document.querySelector('.refresh-btn');
+function refreshNotifications(event) {
+    event.preventDefault();
+    const refreshBtn = event.currentTarget.querySelector('i');
     refreshBtn.classList.add('rotating');
-    
+
     // Simulate API call
     setTimeout(() => {
         refreshBtn.classList.remove('rotating');
@@ -148,9 +155,9 @@ function refreshNotifications() {
 
 // Update notification badge count
 function updateNotificationBadge() {
-    const badge = document.querySelector('.notification-bell .badge');
+    const badge = document.querySelector('.badge');
     const count = notifications.length;
-    
+
     if (count > 0) {
         badge.textContent = count;
         badge.style.display = 'block';
