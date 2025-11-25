@@ -1,19 +1,33 @@
 from enviroment import (FLASK_HOST, FLASK_PORT, FLASK_DEBUG, FLASK_SECRET_KEY,
                         FLASK_DEFAULT_SESSION_LIFETIME)
 
-from controllers.notifications import notifications_bp
-from api.notifications import notifications_api_bp
+from controllers.notifications import NotificationsController
+from api.notifications import NotificationsAPI
 
+from flask_caching import Cache
 from flask import Flask
 
 app = Flask(__name__)
 
-# register blueprints
-app.register_blueprint(notifications_bp)
-app.register_blueprint(notifications_api_bp)
+# Cache config
+cache = Cache(
+    config={
+        'CACHE_TYPE': 'FileSystemCache',
+        'CACHE_DIR': 'flask_cache',
+        'CACHE_THRESHOLD': 0
+    })
+cache.init_app(app)
 
-# Settings
-# app.permanent_session_lifetime = FLASK_DEFAULT_SESSION_LIFETIME
+if not cache.get('notification_list'):
+    cache.set('notification_list', [], timeout=0)
+
+# Define controllers/apis
+notifications_controller = NotificationsController(cache=cache)
+notifications_api = NotificationsAPI(cache=cache)
+
+# register blueprints
+app.register_blueprint(notifications_controller.bp)
+app.register_blueprint(notifications_api.bp)
 
 # Security
 app.secret_key = FLASK_SECRET_KEY

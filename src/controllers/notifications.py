@@ -1,13 +1,15 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template
 
-notifications_bp = Blueprint('notifications', __name__)
+from services.notification import NotificationService
 
 
-@notifications_bp.route('/notifications')
-def index():
+class NotificationsController:
+    bp = Blueprint('notifications', __name__)
 
-    # Init the notification_list if is undefined
-    if not session.get("notification_list"):
-        session["notification_list"] = []
+    def __init__(self, cache):
+        self.notification_service = NotificationService()
+        self.cache = cache
 
-    return render_template('notifications.jinja2')
+    @bp.route('/notifications')
+    def index(self):
+        return render_template('notifications.jinja2')

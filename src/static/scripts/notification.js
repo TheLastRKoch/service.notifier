@@ -1,59 +1,19 @@
-// Sample notification data
-const notificationsData = [
-    {
-        id: 1,
-        source: 'System Alert',
-        title: 'Database Backup Completed',
-        type: 'Success',
-        status: 'Completed',
-        message: 'Your scheduled database backup has been completed successfully. All data has been securely stored in the backup repository. The backup file size is 2.4GB and contains all records up to November 15, 2025.',
-        muted: false
-    },
-    {
-        id: 2,
-        source: 'Security',
-        title: 'New Login Detected',
-        type: 'Warning',
-        status: 'Pending Review',
-        message: 'A new login was detected from an unrecognized device in San Francisco, CA. If this was not you, please secure your account immediately by changing your password and enabling two-factor authentication.',
-        muted: true
-    },
-    {
-        id: 3,
-        source: 'Email Service',
-        title: 'Campaign Report Ready',
-        type: 'Information',
-        status: 'Ready',
-        message: 'Your monthly email campaign analytics report is now available. The report shows a 24% increase in open rates and 18% improvement in click-through rates compared to last month.',
-        muted: false
-    },
-    {
-        id: 4,
-        source: 'Billing',
-        title: 'Payment Received',
-        type: 'Success',
-        status: 'Processed',
-        message: 'Your payment of $49.99 has been successfully processed. Your subscription has been renewed for another month and will expire on December 15, 2025. Thank you for your continued support.',
-        muted: true
-    },
-    {
-        id: 5,
-        source: 'System Update',
-        title: 'Maintenance Scheduled',
-        type: 'Notice',
-        status: 'Upcoming',
-        message: 'Scheduled maintenance is planned for November 20, 2025, from 2:00 AM to 4:00 AM EST. During this time, the system will be temporarily unavailable. Please plan accordingly and save your work.',
-        muted: false
-    }
-];
+let notifications = []
 
-let notifications = [...notificationsData];
+function getNotificationList() {
+    fetch('/api/v1/notification')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(notifications => {
+            console.log(notifications);
+        })
+        .catch(error => console.error('Error:', error));
+}
 
-// Initialize notifications on page load
-document.addEventListener('DOMContentLoaded', function () {
-    renderNotifications();
-    updateNotificationBadge();
-});
 
 // Render all notifications
 function renderNotifications() {
@@ -165,3 +125,11 @@ function updateNotificationBadge() {
         badge.style.display = 'none';
     }
 }
+
+
+// Initialize notifications on page load
+document.addEventListener('DOMContentLoaded', function () {
+    getNotificationList();
+    renderNotifications();
+    updateNotificationBadge();
+});
