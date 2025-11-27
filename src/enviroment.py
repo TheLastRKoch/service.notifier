@@ -10,8 +10,12 @@ load_dotenv()
 FLASK_HOST = "0.0.0.0"
 FLASK_PORT = 8080
 FLASK_DEBUG = True
-FLASK_DEFAULT_SESSION_LIFETIME = datetime.now(
-    timezone.utc) + timedelta(days=30)
+
+# Cache
+CACHE_DEFAULT_TIMEOUT = 2592000  # 1 Month
+CACHE_TYPE = 'FileSystemCache'
+CACHE_DIR = 'flask_cache'
+CACHE_THRESHOLD = 0
 
 # Security
 FLASK_SECRET_KEY = env.get("FLASK_SECRET_KEY")

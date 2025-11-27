@@ -1,15 +1,15 @@
-let notifications = []
+let notification_list = []
 
 function getNotificationList() {
-    fetch('/api/v1/notification')
+    return fetch('/api/v1/notification')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
-        .then(notifications => {
-            console.log(notifications);
+        .then(data => {
+            notification_list = data
         })
         .catch(error => console.error('Error:', error));
 }
@@ -19,7 +19,7 @@ function getNotificationList() {
 function renderNotifications() {
     const container = document.getElementById('notificationsContainer');
 
-    if (notifications.length === 0) {
+    if (notification_list.length === 0) {
         container.innerHTML = `
             <div class="col-12 text-center text-muted mt-5">
                 <i class="bi bi-bell-slash" style="font-size: 4rem;"></i>
@@ -29,7 +29,7 @@ function renderNotifications() {
         return;
     }
 
-    container.innerHTML = notifications.map(notification => `
+    container.innerHTML = notification_list.map(notification => `
         <div class="col-md-6 col-lg-4 mb-2" data-id="${notification.id}">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -82,7 +82,7 @@ function deleteNotification(event, id) {
     card.style.opacity = '0';
 
     setTimeout(() => {
-        notifications = notifications.filter(notification => notification.id !== id);
+        notification_list = notification_list.filter(notification => notification.id !== id);
         renderNotifications();
         updateNotificationBadge();
     }, 300);
@@ -90,10 +90,10 @@ function deleteNotification(event, id) {
 
 // Clear all notifications
 function clearAllNotifications() {
-    if (notifications.length === 0) return;
+    if (notification_list.length === 0) return;
 
     if (confirm('Are you sure you want to clear all notifications?')) {
-        notifications = [];
+        notification_list = [];
         renderNotifications();
         updateNotificationBadge();
     }
@@ -116,7 +116,7 @@ function refreshNotifications(event) {
 // Update notification badge count
 function updateNotificationBadge() {
     const badge = document.querySelector('.badge');
-    const count = notifications.length;
+    const count = notification_list.length;
 
     if (count > 0) {
         badge.textContent = count;
@@ -129,7 +129,8 @@ function updateNotificationBadge() {
 
 // Initialize notifications on page load
 document.addEventListener('DOMContentLoaded', function () {
-    getNotificationList();
-    renderNotifications();
-    updateNotificationBadge();
+    getNotificationList().then(() => {
+        renderNotifications();
+        updateNotificationBadge();
+    });
 });

@@ -1,15 +1,11 @@
 from flask import Blueprint, render_template
 
-from services.notification import NotificationService
 
-
-class NotificationsController:
+def init_notifications_blueprint():
     bp = Blueprint('notifications', __name__)
 
-    def __init__(self, cache):
-        self.notification_service = NotificationService()
-        self.cache = cache
-
     @bp.route('/notifications')
-    def index(self):
+    def index():
         return render_template('notifications.jinja2')
+
+    return bp
