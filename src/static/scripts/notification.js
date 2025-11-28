@@ -32,10 +32,10 @@ const renderNotifications = () => {
 
     container.innerHTML = notification_list.map(notification => `
         <div class="col-md-6 col-lg-4 mb-2" data-id="${notification.id}">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <i class="bi ${notification.muted ? 'bi-bell-slash' : 'bi-bell'} me-2"></i>
+                        <i class="bi ${notification.type === "Silent" ? 'bi-bell-slash' : 'bi-bell'} me-2"></i>
                         <span class="fw-bold">${notification.title}</span>
                     </div>
                     <div class="d-flex">
@@ -63,10 +63,10 @@ const renderNotifications = () => {
                                 <span>${notification.status}</span>
                             </div>
                         </div>
-                        <p class="card-text mt-3">${notification.message}</p>
+                        ${notification.body ? `<p class="card-text mt-3">${notification.body}</p>` : ''}
                     </div>
                     <div class="card-footer text-body-secondary">
-                        2 days ago
+                        ${notification.timestamp}
                     </div>
                 </div>
             </div>
