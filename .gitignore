@@ -3,6 +3,9 @@
 notebook.md
 src/dummy.py
 
+# Build
+flask_cache/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
