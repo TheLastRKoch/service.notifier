@@ -1,9 +1,9 @@
 import { get, remove } from './utils.js'
 
-export async function getNotificationList() {
+export const getNotificationList = async () => {
     return await get("/api/v1/notification")
 }
 
-export async function deleteNotificationByID(id) {
+export const deleteNotificationByID = async (id) => {
     return await remove(`/api/v1/notification/${id}`)
 }

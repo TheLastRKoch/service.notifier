@@ -1,13 +1,11 @@
 import {
     getNotificationList,
     deleteNotificationByID
-} from './requests.js'
+} from './requests.js';
 
-let notification_list = []
+let notification_list = [];
 
-
-// Update notification badge count
-function updateNotificationBadge() {
+const updateNotificationBadge = () => {
     const badge = document.querySelector('.badge');
     const count = notification_list.length;
 
@@ -17,10 +15,9 @@ function updateNotificationBadge() {
     } else {
         badge.style.display = 'none';
     }
-}
+};
 
-// Render all notifications
-function renderNotifications() {
+const renderNotifications = () => {
     const container = document.getElementById('notificationsContainer');
 
     if (notification_list.length === 0) {
@@ -45,7 +42,7 @@ function renderNotifications() {
                         <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="collapse" data-bs-target="#content-${notification.id}">
                             <i class="bi bi-chevron-down"></i>
                         </button>
-                        <button id="btn-delete-notification-${notification.id}" class="btn btn-sm btn-outline-danger">
+                        <button data-action="delete" data-id="${notification.id}" class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -75,67 +72,73 @@ function renderNotifications() {
             </div>
         </div>
     `).join('');
+};
 
-    notification_list.forEach(notification => {
-        const deleteButton = document.getElementById(`btn-delete-notification-${notification.id}`);
-        if (deleteButton) {
-            deleteButton.addEventListener('click', (event) => deleteNotification(event, notification.id));
-        }
-    });
-}
+const deleteNotification = async (id) => {
+    const card = document.querySelector(`[data-id='${id}']`);
+    if (card) {
+        card.style.transition = 'opacity 0.3s ease';
+        card.style.opacity = '0';
+    }
 
-// Delete a single notification
-async function deleteNotification(event, id) {
-    event.stopPropagation();
-
-    await deleteNotificationByID(id)
-
-    const card = event.target.closest('.col-md-6');
-    card.style.transition = 'opacity 0.3s ease';
-    card.style.opacity = '0';
+    await deleteNotificationByID(id);
 
     setTimeout(() => {
-        notification_list = notification_list.filter(notification => notification.id !== id);
+        notification_list = notification_list.filter(notification => notification.id !== Number(id));
         renderNotifications();
         updateNotificationBadge();
     }, 300);
-}
+};
 
-async function getUpdatedNotificationList() {
-    notification_list = await getNotificationList();
-}
+const getUpdatedNotificationList = async () => {
+    notification_list = await getNotificationList() || [];
+};
 
-// Clear all notifications
-async function clearAllNotificationList() {
+const clearAllNotificationList = async () => {
     if (notification_list.length === 0) return;
 
     if (confirm('Are you sure you want to clear all notifications?')) {
-        notification_list.forEach((notification) => deleteNotificationByID(notification.id));
+        const deletePromises = notification_list.map(notification => deleteNotificationByID(notification.id));
+        await Promise.all(deletePromises);
         notification_list = [];
         renderNotifications();
         updateNotificationBadge();
     }
-}
+};
 
-// Refresh notifications
-async function refreshNotifications(event) {
+const refreshNotifications = async (event) => {
     event.preventDefault();
     const refreshBtn = event.currentTarget.querySelector('i');
     refreshBtn.classList.add('rotating');
 
-    await getUpdatedNotificationList()
-    renderNotifications();
-    updateNotificationBadge();
-}
-
-
-// Initialize notifications on page load
-document.addEventListener('DOMContentLoaded', async function () {
     await getUpdatedNotificationList();
     renderNotifications();
     updateNotificationBadge();
-});
 
-document.getElementById("btn-refresh-notification-list").addEventListener('click', (event) => refreshNotifications(event));
+    setTimeout(() => {
+        refreshBtn.classList.remove('rotating');
+    }, 500); // Animation duration
+};
 
-document.getElementById("btn-clear-notification-list").addEventListener('click', (event) => clearAllNotificationList(event));
+const handleEvents = () => {
+    document.getElementById("btn-refresh-notification-list").addEventListener('click', refreshNotifications);
+    document.getElementById("btn-clear-notification-list").addEventListener('click', clearAllNotificationList);
+
+    const notificationsContainer = document.getElementById('notificationsContainer');
+    notificationsContainer.addEventListener('click', (event) => {
+        const target = event.target.closest('button[data-action="delete"]');
+        if (target) {
+            const notificationId = target.dataset.id;
+            deleteNotification(notificationId);
+        }
+    });
+};
+
+const main = async () => {
+    await getUpdatedNotificationList();
+    renderNotifications();
+    updateNotificationBadge();
+    handleEvents();
+};
+
+document.addEventListener('DOMContentLoaded', main);
