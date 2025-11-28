@@ -1,19 +1,23 @@
+import {
+    getNotificationList,
+    deleteNotificationByID
+} from './requests.js'
+
 let notification_list = []
 
-function getNotificationList() {
-    return fetch('/api/v1/notification')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            notification_list = data
-        })
-        .catch(error => console.error('Error:', error));
-}
 
+// Update notification badge count
+function updateNotificationBadge() {
+    const badge = document.querySelector('.badge');
+    const count = notification_list.length;
+
+    if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
 
 // Render all notifications
 function renderNotifications() {
@@ -41,7 +45,7 @@ function renderNotifications() {
                         <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="collapse" data-bs-target="#content-${notification.id}">
                             <i class="bi bi-chevron-down"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification(event, ${notification.id})">
+                        <button id="btn-delete-notification-${notification.id}" class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -71,11 +75,20 @@ function renderNotifications() {
             </div>
         </div>
     `).join('');
+
+    notification_list.forEach(notification => {
+        const deleteButton = document.getElementById(`btn-delete-notification-${notification.id}`);
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (event) => deleteNotification(event, notification.id));
+        }
+    });
 }
 
 // Delete a single notification
-function deleteNotification(event, id) {
+async function deleteNotification(event, id) {
     event.stopPropagation();
+
+    await deleteNotificationByID(id)
 
     const card = event.target.closest('.col-md-6');
     card.style.transition = 'opacity 0.3s ease';
@@ -88,11 +101,16 @@ function deleteNotification(event, id) {
     }, 300);
 }
 
+async function getUpdatedNotificationList() {
+    notification_list = await getNotificationList();
+}
+
 // Clear all notifications
-function clearAllNotifications() {
+async function clearAllNotificationList() {
     if (notification_list.length === 0) return;
 
     if (confirm('Are you sure you want to clear all notifications?')) {
+        notification_list.forEach((notification) => deleteNotificationByID(notification.id));
         notification_list = [];
         renderNotifications();
         updateNotificationBadge();
@@ -100,37 +118,24 @@ function clearAllNotifications() {
 }
 
 // Refresh notifications
-function refreshNotifications(event) {
+async function refreshNotifications(event) {
     event.preventDefault();
     const refreshBtn = event.currentTarget.querySelector('i');
     refreshBtn.classList.add('rotating');
 
-    // Simulate API call
-    setTimeout(() => {
-        refreshBtn.classList.remove('rotating');
-        // In a real app, you would fetch new notifications here
-        console.log('Notifications refreshed');
-    }, 600);
-}
-
-// Update notification badge count
-function updateNotificationBadge() {
-    const badge = document.querySelector('.badge');
-    const count = notification_list.length;
-
-    if (count > 0) {
-        badge.textContent = count;
-        badge.style.display = 'block';
-    } else {
-        badge.style.display = 'none';
-    }
+    await getUpdatedNotificationList()
+    renderNotifications();
+    updateNotificationBadge();
 }
 
 
 // Initialize notifications on page load
-document.addEventListener('DOMContentLoaded', function () {
-    getNotificationList().then(() => {
-        renderNotifications();
-        updateNotificationBadge();
-    });
+document.addEventListener('DOMContentLoaded', async function () {
+    await getUpdatedNotificationList();
+    renderNotifications();
+    updateNotificationBadge();
 });
+
+document.getElementById("btn-refresh-notification-list").addEventListener('click', (event) => refreshNotifications(event));
+
+document.getElementById("btn-clear-notification-list").addEventListener('click', (event) => clearAllNotificationList(event));
