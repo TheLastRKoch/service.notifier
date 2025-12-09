@@ -134,8 +134,26 @@ const handleEvents = () => {
     });
 };
 
+const initSocketConnection = () => {
+    const socket = io();
+
+    socket.on('connect', () => {
+        console.log('connection established');
+        console.log('Connected with sid:', socket.id);
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log('disconnected from server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error.message);
+    });
+}
+
 const main = async () => {
     await getUpdatedNotificationList();
+    initSocketConnection();
     renderNotifications();
     updateNotificationBadge();
     handleEvents();

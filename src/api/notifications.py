@@ -3,9 +3,17 @@ from flask import Blueprint, jsonify, request
 from services.notification import NotificationService
 
 
-def init_api_notifications_blueprint(cache):
+def init_api_notifications_blueprint(cache, socket):
     bp = Blueprint('api', __name__, url_prefix='/api/v1')
     notification_service = NotificationService()
+
+    @socket.event
+    def connect():
+        print("Client connected")
+
+    @socket.event
+    def disconnect():
+        print("Client disconnected")
 
     @bp.route('/notification', methods=['POST'])
     def add_notification():

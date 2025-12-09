@@ -5,12 +5,16 @@ from enviroment import (FLASK_HOST, FLASK_PORT, FLASK_DEBUG, FLASK_SECRET_KEY,
 from controllers.notifications import init_notifications_blueprint
 from api.notifications import init_api_notifications_blueprint
 
+from flask_socketio import SocketIO
 from flask_caching import Cache
 from flask import Flask
 
 app = Flask(__name__)
 
 app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_DEFAULT_TIMEOUT
+
+# Security
+app.secret_key = FLASK_SECRET_KEY
 
 # Cache config
 cache = Cache(
@@ -24,12 +28,12 @@ cache.init_app(app)
 if not cache.get('notification_list'):
     cache.set('notification_list', [], timeout=0)
 
+# Socket config
+socket = SocketIO(app, cors_allowed_origins="*")
+
 # register blueprints
 app.register_blueprint(init_notifications_blueprint())
-app.register_blueprint(init_api_notifications_blueprint(cache))
-
-# Security
-app.secret_key = FLASK_SECRET_KEY
+app.register_blueprint(init_api_notifications_blueprint(cache, socket))
 
 if __name__ == "__main__":
-    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
+    socket.run(app, host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
