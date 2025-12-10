@@ -1,6 +1,6 @@
 from enviroment import (FLASK_HOST, FLASK_PORT, FLASK_DEBUG, FLASK_SECRET_KEY,
                         CACHE_DEFAULT_TIMEOUT, CACHE_TYPE, CACHE_DIR,
-                        CACHE_THRESHOLD)
+                        CACHE_THRESHOLD, ALLOW_UNSAFE_WERKZEUG)
 
 from controllers.notifications import init_notifications_blueprint
 from api.notifications import init_api_notifications_blueprint
@@ -36,4 +36,8 @@ app.register_blueprint(init_notifications_blueprint())
 app.register_blueprint(init_api_notifications_blueprint(cache, socket))
 
 if __name__ == "__main__":
-    socket.run(app, host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
+    socket.run(app,
+               host=FLASK_HOST,
+               port=FLASK_PORT,
+               debug=FLASK_DEBUG,
+               allow_unsafe_werkzeug=ALLOW_UNSAFE_WERKZEUG)

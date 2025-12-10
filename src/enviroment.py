@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# werkzeug
+ALLOW_UNSAFE_WERKZEUG = True
+
 # Flask defaults
 FLASK_HOST = "0.0.0.0"
 FLASK_PORT = 8080
