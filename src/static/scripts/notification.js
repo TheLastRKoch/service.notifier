@@ -3,7 +3,9 @@ import {
     deleteNotificationByID
 } from './requests.js';
 
+// File variables
 let notification_list = [];
+let socket = io();
 
 const updateNotificationBadge = () => {
     const badge = document.querySelector('.badge');
@@ -35,7 +37,7 @@ const renderNotifications = () => {
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <i class="bi ${notification.type === "Silent" ? 'bi-bell-slash' : 'bi-bell'} me-2"></i>
+                        <i class="bi ${notification.type === "silent" ? 'bi-bell-slash' : 'bi-bell'} me-2"></i>
                         <span class="fw-bold">${notification.title}</span>
                     </div>
                     <div class="d-flex">
@@ -94,7 +96,7 @@ const getUpdatedNotificationList = async () => {
     notification_list = await getNotificationList() || [];
 };
 
-const clearAllNotificationList = async () => {
+const clearAllNotificationListEvent = async () => {
     if (notification_list.length === 0) return;
 
     if (confirm('Are you sure you want to clear all notifications?')) {
@@ -106,10 +108,12 @@ const clearAllNotificationList = async () => {
     }
 };
 
-const refreshNotifications = async (event) => {
+const refreshNotificationsEvent = async (event) => {
     event.preventDefault();
     const refreshBtn = event.currentTarget.querySelector('i');
     refreshBtn.classList.add('rotating');
+
+    socket = io();
 
     await getUpdatedNotificationList();
     renderNotifications();
@@ -117,12 +121,12 @@ const refreshNotifications = async (event) => {
 
     setTimeout(() => {
         refreshBtn.classList.remove('rotating');
-    }, 500); // Animation duration
+    }, 500);
 };
 
 const handleEvents = () => {
-    document.getElementById("btn-refresh-notification-list").addEventListener('click', refreshNotifications);
-    document.getElementById("btn-clear-notification-list").addEventListener('click', clearAllNotificationList);
+    document.getElementById("btn-refresh-notification-list").addEventListener('click', refreshNotificationsEvent);
+    document.getElementById("btn-clear-notification-list").addEventListener('click', clearAllNotificationListEvent);
 
     const notificationsContainer = document.getElementById('notificationsContainer');
     notificationsContainer.addEventListener('click', (event) => {
@@ -133,6 +137,55 @@ const handleEvents = () => {
         }
     });
 };
+
+
+const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support desktop notification");
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+        return;
+    }
+
+    if (Notification.permission !== "denied") {
+        await Notification.requestPermission();
+    }
+};
+
+const displayPushNotification = (notificationData) => {
+    if (Notification.permission === "granted") {
+        let options = null
+        if (notificationData.body !== undefined) {
+            options = { body: notificationData.body }
+            //icon: '/static/img/notification-icon.png' // Assuming an icon exists here
+        } else { options = {} };
+        new Notification(`Notifier: ${notificationData.title}`, options);
+    }
+};
+
+socket.on('notification_added', (data) => {
+    (async () => {
+        await getUpdatedNotificationList();
+        renderNotifications();
+        updateNotificationBadge();
+
+        await requestNotificationPermission();
+        if (data) {
+            displayPushNotification(data);
+        }
+    })();
+});
+
+
+socket.on('notification_removed', () => {
+    (async () => {
+        await getUpdatedNotificationList();
+        renderNotifications();
+        updateNotificationBadge();
+    })();
+});
 
 const main = async () => {
     await getUpdatedNotificationList();
