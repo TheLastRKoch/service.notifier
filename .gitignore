@@ -5,6 +5,7 @@ src/dummy.py
 
 # Build
 flask_cache/
+flask_cache/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
