@@ -1,10 +1,8 @@
+from models.notification import Notification
 from utils.time import TimeUtil
 
 
 class NotificationService:
-
-    def __init__(self):
-        self.time_util = TimeUtil()
 
     def _generate_new_id(self, notification_list):
         if len(notification_list) == 0:
@@ -16,18 +14,12 @@ class NotificationService:
         last_id = id_list[-1]
         return last_id + 1
 
-    def add(self, notification_list, title, source, type, status, body):
-        new_id = self._generate_new_id(notification_list)
+    def __init__(self):
+        self.time_util = TimeUtil()
 
-        notification_list.append({
-            "id": new_id,
-            "title": title,
-            "timestamp": self.time_util.get_current_timestamp(),
-            "source": source,
-            "type": type,
-            "status": status,
-            "body": body
-        })
+    def add(self, notification_list, new_notification: Notification):
+        new_notification.set_id(self._generate_new_id(notification_list))
+        notification_list.append(new_notification.to_dict())
 
     def get_by_id(self, notification_list, id):
         for notification in notification_list:

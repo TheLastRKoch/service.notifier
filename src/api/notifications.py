@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from services.notification import NotificationService
+from models.notification import Notification
 
 
 def init_api_notifications_blueprint(cache, socket):
@@ -19,13 +20,14 @@ def init_api_notifications_blueprint(cache, socket):
     def add_notification():
         request_data = request.get_json()
         notification_list = cache.get("notification_list")
-        notification_service.add(notification_list=notification_list,
-                                 title=request_data.get("title"),
-                                 source=request_data.get("source"),
-                                 type=request_data.get("type"),
-                                 status=request_data.get("status"),
-                                 body=request_data.get("body"))
+        new_notification = Notification(title=request_data.get("title"),
+                                        source=request_data.get("source"),
+                                        type=request_data.get("type"),
+                                        status=request_data.get("status"),
+                                        body=request_data.get("body"))
+        notification_service.add(notification_list, new_notification)
         cache.set('notification_list', notification_list, timeout=0)
+        socket.emit('notification_added', new_notification.to_dict())
         return jsonify({"msg": "Notification added successfully"}), 201
 
     @bp.route('/notification/<id>', methods=['GET'])
@@ -46,6 +48,7 @@ def init_api_notifications_blueprint(cache, socket):
         notification_service.remove_by_id(notification_list=notification_list,
                                           id=id)
         cache.set('notification_list', notification_list, timeout=0)
+        socket.emit('notification_removed', id)
         return jsonify(
             {"msg": "The notification has been removed successfully"}), 200
 
