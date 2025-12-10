@@ -2,7 +2,6 @@
 
 service.notifier is a lightweight notification/service-alerting component intended to standardize and simplify sending notifications (email, webhook, SMS, chat integrations, etc.) from backend services. It is designed to be easy to integrate, configurable, and suitable for running as a standalone microservice or being embedded in an existing application.
 
-> Note: This README is intentionally implementation-agnostic. Replace or adjust example commands, config keys, and endpoints below to match the language/runtime and configuration used in this repository.
 
 ## Features
 
@@ -34,87 +33,6 @@ service.notifier is a lightweight notification/service-alerting component intend
    cd service.notifier
    ```
 
-2. Build (example — replace with actual build command for this repo):
-   - Node.js:
-     ```bash
-     npm install
-     npm run build
-     ```
-   - .NET:
-     ```bash
-     dotnet build
-     ```
-   - Other: replace with your project’s build instructions
-
-3. Run locally (example):
-   ```bash
-   # with environment variables
-   export NOTIFIER_API_KEY="your_local_key"
-   export NOTIFIER_CONFIG_PATH="./config/production.json"
-
-   # run the service
-   npm start
-   # or
-   dotnet run --project src/Service.Notifier
-   ```
-
-4. Send a test notification (example curl):
-   ```bash
-   curl -X POST http://localhost:8080/api/notify \
-     -H "Authorization: Bearer ${NOTIFIER_API_KEY}" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "recipient": "ops@example.com",
-       "channel": "email",
-       "subject": "Test notification",
-       "body": "Hello — this is a test from service.notifier",
-       "metadata": {
-         "source": "quick-start"
-       }
-     }'
-   ```
-
-## Configuration
-
-service.notifier reads configuration from environment variables and an optional configuration file. The configuration below is a reference; update keys to match the implementation.
-
-Environment variables (examples):
-- NOTIFIER_PORT (default: 8080)
-- NOTIFIER_HOST (default: 0.0.0.0)
-- NOTIFIER_LOG_LEVEL (info, debug, warn, error)
-- NOTIFIER_API_KEY (or other auth secrets)
-- NOTIFIER_CONFIG_PATH (path to JSON/YAML config)
-
-Example JSON configuration (config/production.json):
-```json
-{
-  "transports": {
-    "email": {
-      "provider": "smtp",
-      "host": "smtp.example.com",
-      "port": 587,
-      "username": "user",
-      "password": "pass"
-    },
-    "slack": {
-      "provider": "incomingWebhook",
-      "webhookUrl": "https://hooks.slack.com/services/XXX/YYY/ZZZ"
-    }
-  },
-  "retryPolicy": {
-    "maxAttempts": 5,
-    "initialDelayMs": 500,
-    "maxDelayMs": 30000,
-    "backoffFactor": 2
-  },
-  "auth": {
-    "type": "apiKey",
-    "keys": [
-      "replace-with-production-key"
-    ]
-  }
-}
-```
 
 ## API
 
@@ -133,15 +51,11 @@ Below are example endpoints that the notifier exposes. Adjust to match your code
 Example request to POST /api/notify:
 ```json
 {
-  "channel": "slack",
-  "recipient": "#alerts",
-  "subject": "Service Down",
-  "body": "Instance i-12345 is unreachable",
-  "priority": "high",
-  "metadata": {
-    "service": "web-api",
-    "region": "us-east-1"
-  }
+    "title": "title",
+    "source": "source",
+    "type": "alert/silent",
+    "status": "toRead/read",
+    "body": "body"
 }
 ```
 
@@ -175,44 +89,6 @@ docker run -d \
   thelastrk/service-notifier:latest
 ```
 
-## Development
-
-- Follow the project conventions (branch naming, commit messages, tests).
-- Run the linter and formatter before committing:
-  - Node: npm run lint && npm run format
-  - .NET: dotnet format
-- If the project includes a Makefile or task runner, use it:
-  ```bash
-  make dev
-  ```
-
-## Testing
-
-- Unit tests:
-  ```bash
-  npm test
-  # or
-  dotnet test
-  ```
-- Integration tests should be run against a test config that uses stubbed or sandbox providers (Mailhog, local webhook receiver, etc.).
-- Add tests for transport plugins, retry/backoff behavior, and authentication.
-
-## Deployment
-
-- Use container orchestration (Kubernetes, ECS, Nomad) or VM images.
-- Use secrets management to provide API keys and provider credentials (Vault, AWS Secrets Manager, GitHub Secrets).
-- Configure liveness/readiness probes:
-  - Liveness: GET /health/live
-  - Readiness: GET /health/ready
-- Scale horizontally and ensure idempotency for retries.
-
-## Logging & Monitoring
-
-- Structured JSON logs are recommended for easy parsing.
-- Expose Prometheus metrics and use an alerting system for:
-  - Failed deliveries
-  - High retry counts
-  - Queue backlog growth
 
 ## Contributing
 
@@ -244,6 +120,6 @@ If you hit issues, open an issue in this repository and include:
 ---
 
 If you'd like, I can:
-- tailor this README to the actual language/runtime in the repo (Node/.NET/Go/etc.),
+- tailor this README to the actual language/runtime in the repo,
 - add real build and run commands, or
 - create a CONTRIBUTING.md and example configuration files and push them to a new branch.
