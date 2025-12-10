@@ -156,11 +156,12 @@ const requestNotificationPermission = async () => {
 
 const displayPushNotification = (notificationData) => {
     if (Notification.permission === "granted") {
-        const options = {
-            body: notificationData.body,
-            icon: '/static/img/notification-icon.png' // Assuming an icon exists here
-        };
-        new Notification(notificationData.title, options);
+        let options = null
+        if (notificationData.body !== undefined) {
+            options = { body: notificationData.body }
+            //icon: '/static/img/notification-icon.png' // Assuming an icon exists here
+        } else { options = {} };
+        new Notification(`Notifier: ${notificationData.title}`, options);
     }
 };
 
@@ -169,7 +170,7 @@ socket.on('notification_added', (data) => {
         await getUpdatedNotificationList();
         renderNotifications();
         updateNotificationBadge();
-        
+
         await requestNotificationPermission();
         if (data) {
             displayPushNotification(data);
