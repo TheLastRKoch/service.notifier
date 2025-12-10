@@ -139,14 +139,44 @@ const handleEvents = () => {
 };
 
 
+const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support desktop notification");
+        return;
+    }
 
-socket.on('notification_added', () => {
+    if (Notification.permission === "granted") {
+        return;
+    }
+
+    if (Notification.permission !== "denied") {
+        await Notification.requestPermission();
+    }
+};
+
+const displayPushNotification = (notificationData) => {
+    if (Notification.permission === "granted") {
+        const options = {
+            body: notificationData.body,
+            icon: '/static/img/notification-icon.png' // Assuming an icon exists here
+        };
+        new Notification(notificationData.title, options);
+    }
+};
+
+socket.on('notification_added', (data) => {
     (async () => {
         await getUpdatedNotificationList();
         renderNotifications();
         updateNotificationBadge();
+        
+        await requestNotificationPermission();
+        if (data) {
+            displayPushNotification(data);
+        }
     })();
 });
+
 
 socket.on('notification_removed', () => {
     (async () => {
